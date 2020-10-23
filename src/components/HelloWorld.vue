@@ -88,6 +88,11 @@ export default {
     rangeValue(value) {
       this.$refs.audio.volume = value / 100;
     },
+    "$refs.audio": () => {
+      this.duration = this.getHumanDuration(
+        Math.ceil(this.$refs.audio.duration)
+      );
+    },
   },
   mounted() {
     this.$refs.audio.onloadedmetadata = () => {
