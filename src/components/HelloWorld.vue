@@ -21,7 +21,7 @@
         v-if="duration"
         :style="{color: mainColor}"
       ) {{ currentDuration }} / {{ duration }}
-      .volume
+      .volume(v-if="navigator !== 'iPhone'")
         button(:name="volumeIcon" @click="rangeOpen = !rangeOpen" width="16" height="16") x
         input(
           :style="`background: -webkit-linear-gradient(left, ${mainColor} 0%, ${mainColor} ${rangeValue}%, #dddddd ${rangeValue}%, #dddddd 100%);`"
@@ -39,8 +39,6 @@
         preload="metadata"
       )
         source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-      
-    | {{ navigator }}
 </template>
 
 <script>
@@ -74,7 +72,12 @@ export default {
   },
   watch: {
     rangeValue(value) {
-      this.$refs.audio.volume = value / 100;
+      // this.$refs.audio.volume = value / 100;
+      if (value === 0) {
+        this.$refs.audio.muted = true;
+      } else {
+        this.$refs.audio.muted = false;
+      }
     },
   },
   mounted() {
@@ -84,16 +87,9 @@ export default {
       );
     };
 
-    this.navigator =
-      navigator.appCodeName +
-      " |2 " +
-      navigator.appName +
-      " |3 " +
-      navigator.platform +
-      " |4 " +
-      navigator.userAgent;
+    this.navigator = navigator.platform;
 
-    console.log(navigator);
+    console.log(this.$refs);
   },
   methods: {
     togglePlay() {
