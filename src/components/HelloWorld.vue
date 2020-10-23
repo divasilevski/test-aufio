@@ -36,10 +36,23 @@
         @timeupdate="updateProgress"
         @ended="isPlaying=false"
         @error="errorHandler"
+        preload="metadata"
       )
         source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
     
-    | {{ obj }}
+    | {{ this.$refs.audio ? this.$refs.audio.volume : null }}
+    | {{ this.$refs.audio ? this.$refs.audio.duration : null }}
+    | {{ test }}
+
+    audio(
+      ref="audio"
+      @timeupdate="updateProgress"
+      @ended="isPlaying=false"
+      @error="errorHandler"
+      preload="metadata"
+      controls
+    )
+      source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
 </template>
 
 <script>
@@ -52,7 +65,7 @@ export default {
       currentDuration: "00:00",
       rangeOpen: false,
       rangeValue: 100,
-      obj: "",
+      test: null,
     };
   },
   computed: {
@@ -81,6 +94,7 @@ export default {
       this.duration = this.getHumanDuration(
         Math.ceil(this.$refs.audio.duration)
       );
+      this.test = this.$refs.audio.duration;
     };
   },
   methods: {
@@ -98,7 +112,6 @@ export default {
       this.currentDuration = this.getHumanDuration(
         Math.ceil(this.$refs.audio.currentTime)
       );
-      this.obj = this.$refs.audio.volume
     },
     setAudioTime() {
       this.$refs.audio.currentTime =
