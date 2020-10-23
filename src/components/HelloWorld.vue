@@ -20,7 +20,7 @@
       .time(
         v-if="duration"
         :style="{color: mainColor}"
-      ) {{ duration }}
+      ) {{ currentDuration }} / {{ duration }}
       .volume
         button(:name="volumeIcon" @click="rangeOpen = !rangeOpen" width="16" height="16") x
         input(
@@ -38,6 +38,8 @@
         @error="errorHandler"
       )
         source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+    
+    | {{ obj }}
 </template>
 
 <script>
@@ -47,8 +49,10 @@ export default {
       isPlaying: false,
       progress: 0,
       duration: 100,
+      currentDuration: "00:00",
       rangeOpen: false,
       rangeValue: 100,
+      obj: "",
     };
   },
   computed: {
@@ -74,7 +78,9 @@ export default {
   },
   mounted() {
     this.$refs.audio.onloadeddata = () => {
-      this.duration = this.getHumanDuration();
+      this.duration = this.getHumanDuration(
+        Math.ceil(this.$refs.audio.duration)
+      );
     };
   },
   methods: {
@@ -89,17 +95,20 @@ export default {
     updateProgress() {
       this.progress =
         (this.$refs.audio.currentTime / this.$refs.audio.duration) * 100;
+      this.currentDuration = this.getHumanDuration(
+        Math.ceil(this.$refs.audio.currentTime)
+      );
+      this.obj = this.$refs.audio.volume
     },
     setAudioTime() {
       this.$refs.audio.currentTime =
         (this.$refs.audio.duration * this.progress) / 100;
     },
-    getHumanDuration() {
+    getHumanDuration(duration) {
       const toFormat = (value) => {
         return value <= 9 ? "0" + value : value;
       };
 
-      const duration = Math.ceil(this.$refs.audio.duration);
       const minutes = parseInt(duration / 60);
       const seconds = duration - minutes * 60;
       return `${toFormat(minutes)}:${toFormat(seconds)}`;
