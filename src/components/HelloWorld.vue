@@ -72,12 +72,7 @@ export default {
   },
   watch: {
     rangeValue(value) {
-      // this.$refs.audio.volume = value / 100;
-      if (value === 0) {
-        this.$refs.audio.muted = true;
-      } else {
-        this.$refs.audio.muted = false;
-      }
+      this.$refs.audio.volume = value / 100;
     },
   },
   mounted() {
