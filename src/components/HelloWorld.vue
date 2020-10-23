@@ -1,58 +1,233 @@
-<template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+<template lang="pug">
+  .audio-block
+    .audio-player
+      .control(
+        @click="togglePlay"
+      )
+        button(:name="isPlaying ? 'pause' : 'play'" fill="inherit") >
+      
+      .progress-bar
+        input(
+          :class="{ 'slider-none': !isPlaying }"
+          ref="progress"
+          :style="`background: -webkit-linear-gradient(left, ${mainColor} 0%, ${mainColor} ${progress}%, #dddddd ${progress}%, #dddddd 100%);`" 
+          min="0" 
+          max="100" 
+          v-model="progress"
+          @input="setAudioTime"
+          type="range"
+        )
+      .time(
+        v-if="duration"
+        :style="{color: mainColor}"
+      ) {{ duration }}
+      .volume
+        button(:name="volumeIcon" @click="rangeOpen = !rangeOpen" width="16" height="16") x
+        input(
+          :style="`background: -webkit-linear-gradient(left, ${mainColor} 0%, ${mainColor} ${rangeValue}%, #dddddd ${rangeValue}%, #dddddd 100%);`"
+          min="0" 
+          max="100" 
+          v-model="rangeValue" 
+          type="range" 
+          v-show="rangeOpen"
+        )
+      audio(
+        ref="audio"
+        @timeupdate="updateProgress"
+        @ended="isPlaying=false"
+        @error="errorHandler"
+      )
+        source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  data() {
+    return {
+      isPlaying: false,
+      progress: 0,
+      duration: 100,
+      rangeOpen: false,
+      rangeValue: 100,
+    };
+  },
+  computed: {
+    mainColor() {
+      return "#000000";
+    },
+    volumeIcon() {
+      if (this.rangeValue > 70) {
+        return "volume/max";
+      } else if (this.rangeValue > 30) {
+        return "volume/mid";
+      } else if (this.rangeValue > 0) {
+        return "volume/low";
+      } else {
+        return "volume/mute";
+      }
+    },
+  },
+  watch: {
+    rangeValue(value) {
+      this.$refs.audio.volume = value / 100;
+    },
+  },
+  mounted() {
+    this.$refs.audio.onloadeddata = () => {
+      this.duration = this.getHumanDuration();
+    };
+  },
+  methods: {
+    togglePlay() {
+      if (!this.isPlaying) {
+        this.$refs.audio.play();
+      } else {
+        this.$refs.audio.pause();
+      }
+      this.isPlaying = !this.isPlaying;
+    },
+    updateProgress() {
+      this.progress =
+        (this.$refs.audio.currentTime / this.$refs.audio.duration) * 100;
+    },
+    setAudioTime() {
+      this.$refs.audio.currentTime =
+        (this.$refs.audio.duration * this.progress) / 100;
+    },
+    getHumanDuration() {
+      const toFormat = (value) => {
+        return value <= 9 ? "0" + value : value;
+      };
+
+      const duration = Math.ceil(this.$refs.audio.duration);
+      const minutes = parseInt(duration / 60);
+      const seconds = duration - minutes * 60;
+      return `${toFormat(minutes)}:${toFormat(seconds)}`;
+    },
+    errorHandler() {
+      alert("AudioBlock: Something wrong!");
+    },
+  },
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style lang="scss" scoped>
+.audio-block {
+  background: red;
+  margin-top: 30px;
+
+  .audio-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    line-height: 140%;
+    color: #747474;
+
+    &:first {
+      margin-top: 30px;
+    }
+  }
+
+  .audio-player {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    .control {
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-style: solid;
+      border-width: 2px;
+      border-color: var(--main-color);
+      fill: var(--main-color);
+      transition: 0.3s;
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        fill: black;
+        border-color: black;
+      }
+      svg {
+        width: 8px;
+        height: 100%;
+      }
+    }
+
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      max-width: 300px;
+      input {
+        margin: 0 10px;
+        width: 100%;
+      }
+    }
+
+    .volume {
+      position: relative;
+      display: flex;
+      margin-left: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      fill: var(--main-color);
+
+      svg:hover {
+        fill: #000000;
+      }
+      input {
+        position: absolute;
+        transform: rotate(-90deg);
+        width: 80px;
+        left: -33px;
+        top: -47px;
+      }
+    }
+  }
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+input[type="range"] {
+  background: #dddddd;
+  border-radius: 5px;
+  height: 4px;
+  -webkit-appearance: none;
+  outline: none;
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border: 2px solid var(--main-color);
+    border-radius: 14px;
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border: 2px solid var(--main-color);
+    border-radius: 14px;
+    cursor: pointer;
+  }
+
+  &.slider-none {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb {
+      display: none;
+    }
+  }
 }
 </style>
