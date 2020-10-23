@@ -47,7 +47,7 @@ export default {
     return {
       isPlaying: false,
       progress: 0,
-      duration: 100,
+      duration: "00:00",
       currentDuration: "00:00",
       rangeOpen: false,
       rangeValue: 100,
