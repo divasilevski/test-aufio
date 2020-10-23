@@ -39,20 +39,8 @@
         preload="metadata"
       )
         source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-    
-    | {{ this.$refs.audio ? this.$refs.audio.volume : null }}
-    | {{ this.$refs.audio ? this.$refs.audio.duration : null }}
-    | {{ test }}
-
-    audio(
-      ref="audio"
-      @timeupdate="updateProgress"
-      @ended="isPlaying=false"
-      @error="errorHandler"
-      preload="auto"
-      controls
-    )
-      source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+      
+    | {{ navigator }}
 </template>
 
 <script>
@@ -65,7 +53,7 @@ export default {
       currentDuration: "00:00",
       rangeOpen: false,
       rangeValue: 100,
-      test: null,
+      navigator: "",
     };
   },
   computed: {
@@ -94,8 +82,18 @@ export default {
       this.duration = this.getHumanDuration(
         Math.ceil(this.$refs.audio.duration)
       );
-      this.test = this.$refs.audio.duration;
     };
+
+    this.navigator =
+      navigator.appCodeName +
+      " |2 " +
+      navigator.appName +
+      " |3 " +
+      navigator.platform +
+      " |4 " +
+      navigator.userAgent;
+
+    console.log(navigator);
   },
   methods: {
     togglePlay() {
@@ -138,7 +136,6 @@ export default {
 
 <style lang="scss" scoped>
 .audio-block {
-  background: red;
   margin-top: 30px;
 
   .audio-title {
@@ -154,6 +151,8 @@ export default {
   }
 
   .audio-player {
+    background: rgb(228, 111, 228);
+    max-width: 500px;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
