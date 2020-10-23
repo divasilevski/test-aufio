@@ -49,7 +49,7 @@
       @timeupdate="updateProgress"
       @ended="isPlaying=false"
       @error="errorHandler"
-      preload="metadata"
+      preload="auto"
       controls
     )
       source(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
@@ -90,7 +90,7 @@ export default {
     },
   },
   mounted() {
-    this.$refs.audio.onloadeddata = () => {
+    this.$refs.audio.onloadedmetadata = () => {
       this.duration = this.getHumanDuration(
         Math.ceil(this.$refs.audio.duration)
       );
@@ -107,6 +107,9 @@ export default {
       this.isPlaying = !this.isPlaying;
     },
     updateProgress() {
+      // this.duration = this.getHumanDuration(
+      //   Math.ceil(this.$refs.audio.duration)
+      // );
       this.progress =
         (this.$refs.audio.currentTime / this.$refs.audio.duration) * 100;
       this.currentDuration = this.getHumanDuration(
